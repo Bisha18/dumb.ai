@@ -39,7 +39,7 @@ const Layout = () => {
             <span className="text-xs bg-gray-200 px-2 py-1 border border-black rounded-md">Ctrl K</span>
           </button>
           
-          <Link to="/" className="flex items-center space-x-3 p-3 bg-white border-brutal shadow-brutal hover:shadow-brutal-hover hover:-translate-y-1 transition-transform font-bold text-lg">
+          <Link to="/dashboard" className="flex items-center space-x-3 p-3 bg-white border-brutal shadow-brutal hover:shadow-brutal-hover hover:-translate-y-1 transition-transform font-bold text-lg">
             <Home className="w-6 h-6" />
             <span>Dashboard</span>
           </Link>
@@ -61,7 +61,7 @@ const Layout = () => {
             onClick={() => {
               localStorage.removeItem('token');
               localStorage.removeItem('user');
-              window.location.href = '/login';
+              window.location.href = '/landing';
             }}
             className="w-full p-3 font-bold text-white bg-neo-black border-brutal shadow-brutal hover:bg-neo-red hover:-translate-y-1 transition-all cursor-pointer"
           >
@@ -77,7 +77,7 @@ const Layout = () => {
 
       {/* Bottom Nav for Mobile */}
       <nav className="md:hidden fixed bottom-0 w-full bg-white border-t-brutal-lg border-neo-black flex justify-around p-3 z-50">
-        <Link to="/" className="p-2"><Home className="w-8 h-8" /></Link>
+        <Link to="/dashboard" className="p-2"><Home className="w-8 h-8" /></Link>
         <button onClick={() => setIsSearchOpen(true)} className="p-2"><SearchIcon className="w-8 h-8" /></button>
         <Link to="/notes" className="p-2"><FileText className="w-8 h-8" /></Link>
         <Link to="/graph" className="p-2"><Network className="w-8 h-8" /></Link>
