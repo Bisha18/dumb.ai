@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@theme {
+  --color-neo-yellow: #ffde59;
+  --color-neo-black: #111111;
+  --color-neo-white: #f5f5f5;
+  --color-neo-blue: #3b82f6;
+  --color-neo-red: #ef4444;
+
+  --box-shadow-brutal: 4px 4px 0px 0px rgba(0,0,0,1);
+  --box-shadow-brutal-hover: 6px 6px 0px 0px rgba(0,0,0,1);
+  --box-shadow-brutal-sm: 2px 2px 0px 0px rgba(0,0,0,1);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-neo-white);
+    color: var(--color-neo-black);
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer utilities {
+  .border-brutal {
+    border: 3px solid var(--color-neo-black);
+  }
+  
+  .border-brutal-lg {
+    border: 5px solid var(--color-neo-black);
+  }
+  
+  .shadow-brutal {
+    box-shadow: var(--box-shadow-brutal);
+  }
+  
+  .shadow-brutal-hover:hover {
+    box-shadow: var(--box-shadow-brutal-hover);
+    transform: translate(-2px, -2px);
+    transition: all 0.15s ease-in-out;
+  }
+  
+  .shadow-brutal-sm {
+    box-shadow: var(--box-shadow-brutal-sm);
+  }
+}
