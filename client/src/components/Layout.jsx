@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { Home, FileText, Network, Sparkles, Search as SearchIcon } from 'lucide-react';
 import SearchModal from './SearchModal';
+import useStore from '../store/useStore';
 
 const Layout = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const setUser = useStore(state => state.setUser);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -59,9 +62,8 @@ const Layout = () => {
         <div className="p-4 mt-auto border-t-brutal border-neo-black">
           <button 
             onClick={() => {
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-              window.location.href = '/landing';
+              setUser(null, null);
+              navigate('/landing');
             }}
             className="w-full p-3 font-bold text-white bg-neo-black border-brutal shadow-brutal hover:bg-neo-red hover:-translate-y-1 transition-all cursor-pointer"
           >
