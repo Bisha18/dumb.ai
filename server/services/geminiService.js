@@ -16,7 +16,7 @@ const summarizeNote = async (content) => {
     
     console.log('[Gemini] Calling generateContent for summarize...');
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
     });
     
@@ -36,7 +36,7 @@ const suggestLinks = async (content, existingTags) => {
     
     console.log('[Gemini] Calling generateContent for suggest-links...');
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
     });
     
