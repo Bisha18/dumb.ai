@@ -1,80 +1,125 @@
-const { GoogleGenAI } = require("@google/genai");
+const OpenRouter = require("@openrouter/sdk");
 
 const getClient = () => {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY;
 
   console.log(
-    "[Gemini] API Key exists:",
+    "[OpenRouter] API Key exists:",
     !!apiKey,
     "| Length:",
     apiKey?.length
   );
 
-  if (!apiKey || apiKey === "your_gemini_api_key_here") {
-    throw new Error("Valid Gemini API Key is missing.");
+  if (!apiKey) {
+    throw new Error("Valid OpenRouter API Key is missing.");
   }
 
-  return new GoogleGenAI({ apiKey });
+  return new OpenRouter({ apiKey });
 };
+
+// 🔥 FREE MODEL (Primary)
+const FREE_MODEL = "meta-llama/llama-3-8b-instruct:free";
+
+// 🔁 Backup FREE MODEL
+const FALLBACK_MODEL = "mistralai/mistral-7b-instruct:free";
 
 // ✅ Summarize Note
 const summarizeNote = async (content) => {
+  const client = getClient();
+  const prompt = `Summarize the following note in bullet points. Be extremely concise:\n\n${content.slice(0, 5000)}`;
+
   try {
-    const ai = getClient();
+    console.log("[OpenRouter] Calling summarize (primary model)...");
 
-    const prompt = `Summarize the following note in bullet points. Be extremely concise:\n\n${content.slice(0, 5000)}`;
-
-    console.log("[Gemini] Calling generateContent for summarize...");
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
+    const response = await client.chat.completions.create({
+      model: FREE_MODEL,
+      messages: [{ role: "user", content: prompt }],
     });
 
-    const text = response.text();
+    const text = response.choices[0].message.content;
 
-    console.log("[Gemini] Summary received, length:", text?.length);
+    console.log("[OpenRouter] Summary received (primary), length:", text?.length);
 
     return text;
+
   } catch (error) {
-    console.error("[Gemini] summarizeNote error:", error.message);
-    throw error;
+    console.warn("[OpenRouter] Primary model failed, switching to fallback...");
+
+    try {
+      const response = await client.chat.completions.create({
+        model: FALLBACK_MODEL,
+        messages: [{ role: "user", content: prompt }],
+      });
+
+      const text = response.choices[0].message.content;
+
+      console.log("[OpenRouter] Summary received (fallback), length:", text?.length);
+
+      return text;
+
+    } catch (err) {
+      console.error("[OpenRouter] summarizeNote error:", err.message);
+      throw err;
+    }
   }
 };
 
 // ✅ Suggest Links / Tags
 const suggestLinks = async (content, existingTags) => {
-  try {
-    const ai = getClient();
+  const client = getClient();
 
-    const prompt = `Based on the following note, suggest exactly 3 short related topics or tags.
+  const prompt = `Suggest exactly 3 short related topics or tags.
+
 Existing tags: ${existingTags}
 
 Note:
 ${content.slice(0, 5000)}
 
-Return ONLY comma-separated values. No markdown.`;
+Return ONLY comma-separated values.`;
 
-    console.log("[Gemini] Calling generateContent for suggest-links...");
+  try {
+    console.log("[OpenRouter] Calling suggest-links (primary model)...");
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
+    const response = await client.chat.completions.create({
+      model: FREE_MODEL,
+      messages: [{ role: "user", content: prompt }],
     });
 
-    const text = response.text();
+    const text = response.choices[0].message.content;
 
     console.log(
-      "[Gemini] Suggestions received:",
+      "[OpenRouter] Suggestions received (primary):",
       text?.substring(0, 100)
     );
 
     return text
       .split(",")
       .map((item) => item.replace(".", "").trim());
+
   } catch (error) {
-    console.error("[Gemini] suggestLinks error:", error.message);
-    throw error;
+    console.warn("[OpenRouter] Primary model failed, switching to fallback...");
+
+    try {
+      const response = await client.chat.completions.create({
+        model: FALLBACK_MODEL,
+        messages: [{ role: "user", content: prompt }],
+      });
+
+      const text = response.choices[0].message.content;
+
+      console.log(
+        "[OpenRouter] Suggestions received (fallback):",
+        text?.substring(0, 100)
+      );
+
+      return text
+        .split(",")
+        .map((item) => item.replace(".", "").trim());
+
+    } catch (err) {
+      console.error("[OpenRouter] suggestLinks error:", err.message);
+      throw err;
+    }
   }
 };
 
