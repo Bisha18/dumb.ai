@@ -1,4 +1,4 @@
-const OpenRouter = require("@openrouter/sdk");
+const OpenAI = require("openai");
 
 const getClient = () => {
   const apiKey = process.env.OPENROUTER_API_KEY;
@@ -14,113 +14,46 @@ const getClient = () => {
     throw new Error("Valid OpenRouter API Key is missing.");
   }
 
-  return new OpenRouter({ apiKey });
+  return new OpenAI({
+    apiKey,
+    baseURL: "https://openrouter.ai/api/v1",
+  });
 };
 
-// 🔥 FREE MODEL (Primary)
 const FREE_MODEL = "meta-llama/llama-3-8b-instruct:free";
 
-// 🔁 Backup FREE MODEL
-const FALLBACK_MODEL = "mistralai/mistral-7b-instruct:free";
-
-// ✅ Summarize Note
 const summarizeNote = async (content) => {
   const client = getClient();
-  const prompt = `Summarize the following note in bullet points. Be extremely concise:\n\n${content.slice(0, 5000)}`;
 
-  try {
-    console.log("[OpenRouter] Calling summarize (primary model)...");
+  const response = await client.chat.completions.create({
+    model: FREE_MODEL,
+    messages: [
+      {
+        role: "user",
+        content: `Summarize in bullet points:\n\n${content.slice(0, 5000)}`
+      }
+    ],
+  });
 
-    const response = await client.chat.completions.create({
-      model: FREE_MODEL,
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const text = response.choices[0].message.content;
-
-    console.log("[OpenRouter] Summary received (primary), length:", text?.length);
-
-    return text;
-
-  } catch (error) {
-    console.warn("[OpenRouter] Primary model failed, switching to fallback...");
-
-    try {
-      const response = await client.chat.completions.create({
-        model: FALLBACK_MODEL,
-        messages: [{ role: "user", content: prompt }],
-      });
-
-      const text = response.choices[0].message.content;
-
-      console.log("[OpenRouter] Summary received (fallback), length:", text?.length);
-
-      return text;
-
-    } catch (err) {
-      console.error("[OpenRouter] summarizeNote error:", err.message);
-      throw err;
-    }
-  }
+  return response.choices[0].message.content;
 };
 
-// ✅ Suggest Links / Tags
 const suggestLinks = async (content, existingTags) => {
   const client = getClient();
 
-  const prompt = `Suggest exactly 3 short related topics or tags.
+  const response = await client.chat.completions.create({
+    model: FREE_MODEL,
+    messages: [
+      {
+        role: "user",
+        content: `Suggest 3 tags. Existing: ${existingTags}\n\n${content.slice(0, 5000)}\n\nComma separated only.`
+      }
+    ],
+  });
 
-Existing tags: ${existingTags}
-
-Note:
-${content.slice(0, 5000)}
-
-Return ONLY comma-separated values.`;
-
-  try {
-    console.log("[OpenRouter] Calling suggest-links (primary model)...");
-
-    const response = await client.chat.completions.create({
-      model: FREE_MODEL,
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const text = response.choices[0].message.content;
-
-    console.log(
-      "[OpenRouter] Suggestions received (primary):",
-      text?.substring(0, 100)
-    );
-
-    return text
-      .split(",")
-      .map((item) => item.replace(".", "").trim());
-
-  } catch (error) {
-    console.warn("[OpenRouter] Primary model failed, switching to fallback...");
-
-    try {
-      const response = await client.chat.completions.create({
-        model: FALLBACK_MODEL,
-        messages: [{ role: "user", content: prompt }],
-      });
-
-      const text = response.choices[0].message.content;
-
-      console.log(
-        "[OpenRouter] Suggestions received (fallback):",
-        text?.substring(0, 100)
-      );
-
-      return text
-        .split(",")
-        .map((item) => item.replace(".", "").trim());
-
-    } catch (err) {
-      console.error("[OpenRouter] suggestLinks error:", err.message);
-      throw err;
-    }
-  }
+  return response.choices[0].message.content
+    .split(",")
+    .map(i => i.trim());
 };
 
 module.exports = {
