@@ -13,7 +13,8 @@ const AIInsights = () => {
       const res = await api.post('/ai/summarize', { content: query });
       setSummary(res.data.summary);
     } catch (error) {
-      setSummary('Failed to fetch summary.');
+      const msg = error.response?.data?.message || error.message || 'Unknown error';
+      setSummary(`Failed to fetch summary: ${msg}`);
     } finally {
       setLoading(false);
     }
