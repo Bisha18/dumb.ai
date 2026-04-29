@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://dumbiq.onrender.com/api',
+  baseURL: 'https://dumb-ai-v77a.onrender.com/api',
 });
 
 api.interceptors.request.use((config) => {
